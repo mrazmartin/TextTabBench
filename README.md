@@ -14,8 +14,8 @@ This work is part of our workshop paper:
 TextTabBench/
 │
 ├── configs/                     # Configuration scripts for dataset metadata
-├── datasets_files/              # Raw and preprocessed data files (inits upon running a dataset notebook)
 ├── datasets_notebooks/          # Jupyter notebooks to downlaod and explore each dataset
+│    ├── datasets_files/              # Raw and preproc. data (inits upon running a notebook)
 │    ├── paper_datasets/              # Datasets included in the workshop paper
 │    │   ├── classification/          # Classification tasks
 │    │   └── regression/              # Regression tasks
@@ -30,7 +30,7 @@ TextTabBench/
 │    
 ├── src/                         # Source code for utilities and dataset processing
 │   ├── dataloader_functions/    # Helpers functions
-│   └── download_datasets/       # Script to download datasets pipelines
+│   └── download_datasets/       # Script to download the datasets
 │
 ├── requirements.txt             # Python dependencies
 └── README.md                    # You're here!
@@ -55,6 +55,8 @@ These are high-quality datasts that did not make it to our benchmark at the time
 ### `other_datasets/` (Valuable Additions)
 
 These are good-quality datasets that did not make it into the final benchmark due to reasons like domain overlap, weaker/unclear text signals etc. Still, they are useful for experimentation and ablation studies.
+
+-> This section is yet to be added. Main focus will be the [CARTE](https://arxiv.org/abs/2402.16785) and [AutoML for Tabular with Text](https://arxiv.org/abs/2111.02705) benchmark datasets.
 
 ### Future Additions
 
@@ -89,9 +91,12 @@ At last, there is also space for some further analysis of the final data, ready 
 ### 4. Download the Datasets
 Run
 ```bash
-python src/download_datasets/download_datasets.py --dataset <dataset_name> --path <home_dir_for_downloads> --task <reg/clf> --selection <all/default>
+python src/download_datasets/download_datasets.py --task <reg/clf> --selection <[default/extra/other/_specific_name_]>
 ```
-to download either a single dataset or a whole subset of them.
+to download either a single dataset or a whole subset of them. It will save both the raw and processed version of the data to the `datasets_files` folder.
+
+### Issues:
+When a single dataset fails to download, enter its notebook and toggle `force_download` to `False` to enfore a fresh download (otherwise it may get stuck on corrupted files) and run the download cell again.
 
 ---
 

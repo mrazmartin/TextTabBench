@@ -18,6 +18,7 @@ def weighted_loss(y_true, y_pred, class_weights=None):
     
     return np.mean(weighted_losses)
 
+# TextTabBench Datasets
 data_configs = {
     # CLASSIFICATION DATASETS
     'customer_complaints': {
@@ -31,19 +32,6 @@ data_configs = {
         'target': 'Company response to consumer',
 
         'ntbk': 'complaints_data.ipynb',
-        },
-    'diabetes': {
-        'dataset_name': 'diabetes',
-        'short_name': 'diabetes',
-        'source': 'kaggle',
-        'remote_path': 'ziya07/diabetes-clinical-dataset100k-rows',
-        'files': ['diabetes_dataset_with_notes.csv'],
-        'rename_files': ['diabetes.csv'],
-        'task': 'clf',
-        'target': 'diabetes',
-
-        'task': 'clf',
-        'ntbk': 'diabetes_data.ipynb',
         },
     'job_frauds': {
         'dataset_name': 'job_frauds',
@@ -80,30 +68,6 @@ data_configs = {
         'task': 'clf',
     
         'ntbk': 'kickstarter_data.ipynb',
-        },
-    'lending_club': {
-        'dataset_name': 'lending_club',
-        'short_name': 'lending',
-        'source': 'kaggle',
-        'remote_path': 'imsparsh/lending-club-loan-dataset-2007-2011',
-        'files': ['loan.csv'],
-        'rename_files': ['ledning_club.csv'],
-        'task': 'clf',
-        'target': 'loan_status',
-
-        'ntbk': 'lending_club_data.ipynb',
-        },
-    'okcupid': {
-        'dataset_name': 'okcupid',
-        'short_name': 'cupid',
-        'source': 'kaggle',
-        'remote_path': 'andrewmvd/okcupid-profiles',
-        'files': ['okcupid_profiles.csv'],
-        'rename_files': ['okcupid_data.csv'],
-        'task': 'clf',
-        'target': 'orientation',
-
-        'ntbk': 'okcupid_attr_data.ipynb',
         },
     'osha_accidents': {
         'dataset_name': 'osha_accidents',
@@ -218,6 +182,46 @@ data_configs = {
 
 # EXTRA DATASETS
 extra_configs = {
+    # Classification datasets
+    'diabetes': {
+        'dataset_name': 'diabetes',
+        'short_name': 'diabetes',
+        'source': 'kaggle',
+        'remote_path': 'ziya07/diabetes-clinical-dataset100k-rows',
+        'files': ['diabetes_dataset_with_notes.csv'],
+        'rename_files': ['diabetes.csv'],
+        'task': 'clf',
+        'target': 'diabetes',
+
+        'task': 'clf',
+        'ntbk': 'diabetes_data.ipynb',
+        },
+    'lending_club': {
+        'dataset_name': 'lending_club',
+        'short_name': 'lending',
+        'source': 'kaggle',
+        'remote_path': 'imsparsh/lending-club-loan-dataset-2007-2011',
+        'files': ['loan.csv'],
+        'rename_files': ['ledning_club.csv'],
+        'task': 'clf',
+        'target': 'loan_status',
+
+        'ntbk': 'lending_club_data.ipynb',
+        },
+    'okcupid': {
+        'dataset_name': 'okcupid',
+        'short_name': 'cupid',
+        'source': 'kaggle',
+        'remote_path': 'andrewmvd/okcupid-profiles',
+        'files': ['okcupid_profiles.csv'],
+        'rename_files': ['okcupid_data.csv'],
+        'task': 'clf',
+        'target': 'orientation',
+
+        'ntbk': 'okcupid_attr_data.ipynb',
+        },
+
+    # Regression datasets
     'covid_trials': {
         'dataset_name': 'covid_trials',
         'short_name': 'covid',
@@ -279,59 +283,71 @@ extra_configs = {
         },
 }
 
-def get_dataset_list(datasets_selection):
+# OTHER DATASETS -> TO BE POPULATED BY WEAKER CANDIDATES
+other_configs = {}
+
+# Combine all dataset configurations into a single dictionary
+all_configs = {**data_configs, **extra_configs, **other_configs}
+
+
+# Get a subset of dataset names based on the selection criteria
+def get_dataset_list(datasets_selection:list, task='all'):
     """
     Return a list of dataset names based on the selection criteria.
-    
-    Args:
-        datasets_selection (str): Selection criteria for datasets. Options are:
-            - 'all': All datasets
-            - 'clf': All classification datasets
-            - 'reg': All regression datasets
-            - Specific dataset name: e.g., 'customer_complaints'
     """
-    if datasets_selection == 'all':
-        dataset_name_list = get_all_datasets()
-    elif datasets_selection == 'clf':
-        dataset_name_list = get_classification_datasets()
-    elif datasets_selection == 'reg':
-        dataset_name_list = get_regression_datasets()
-    elif datasets_selection in get_all_datasets():
-        dataset_name_list = [datasets_selection]
-    else:
-        raise ValueError(f"Invalid selection '{datasets_selection}'. Choose 'all', 'clf', 'reg', or a specific dataset name.")
-    return dataset_name_list
 
+    # 1. check which subset of the datasets to use
+    allowed_selections = {'default': data_configs,
+                          'extra': extra_configs,
+                          'other': other_configs,
+                        }
+    selected_config = {}
+
+    if isinstance(datasets_selection, str):
+        datasets_selection = [datasets_selection]
+
+    for selection in datasets_selection:
+        if selection not in allowed_selections and selection not in all_configs:
+            raise ValueError(f"Invalid selection '{selection}'. Allowed values are {allowed_selections}.")
+        if selection in allowed_selections:
+            selected_config.update(allowed_selections[selection])
+        else:
+            # in case of a specific dataset name was given
+            selected_config[selection] = all_configs[selection]
+
+    # 2. subsample the datasets based on the task type
+    if task not in ['clf', 'reg', 'all']:
+        raise ValueError("Invalid task type. Use 'clf' for classification or 'reg' for regression datasets, or 'all' for both.")
+
+    # 3. filter the datasets based on the task type
+    datasets_name_list = _get_dataset_names(selected_config, task)
+
+    return datasets_name_list
+
+def _get_dataset_names(selected_cofnig:dict, task='all'):
+    """
+    Return a list of regression datasets names.
+    """
+    if task not in ['clf', 'reg', 'all']:
+        raise ValueError("Invalid task type. Use 'clf' for classification or 'reg' for regression datasets, or 'all' for both.")
+
+    if task == 'all':
+        return list(selected_cofnig.keys())
+    else:
+        return [config_key for config_key in selected_cofnig.keys() if selected_cofnig[config_key]['task'] == task]
+
+
+# Return a specific dataset configuration by calling its name
 def get_a_dataset_dict(name):
     """
     Return a specific dataset configuration by name. Fake it as nested dict.
     """
+    if name not in all_configs:
+        raise ValueError(f"Dataset '{name}' not found in configurations.")
 
-    return data_configs.get(name, None)
-
-def get_all_datasets():
-    """
-    Return a list of all dataset names
-    """
-    return list(data_configs.keys())
-
-def get_regression_datasets():
-    """
-    Return a list of regression datasets names.
-    """
-
-    return [config_key for config_key in data_configs.keys() if data_configs[config_key]['task'] == 'reg']
-
-def get_classification_datasets():
-    """
-    Return a list of classification datasets names.
-    """
-    return [config_key for config_key in data_configs.keys() if data_configs[config_key]['task'] == 'clf']
-
+    return all_configs.get(name, None)
 
 if __name__ == "__main__":
     # Example usage
-    print("All datasets:", get_all_datasets())
-    print("Regression datasets:", get_regression_datasets())
-    print("Classification datasets:", get_classification_datasets())
-    print("Specific dataset:", get_a_dataset_dict('customer_complaints'))
+    print("Default and Extra Classification datasets:", get_dataset_list(['default', 'okcupid'], 'reg'))
+    # print("Specific dataset:", get_a_dataset_dict('okcupid'))
