@@ -1,6 +1,8 @@
 from nbclient import NotebookClient
 from nbformat import read, write
 import os, sys
+import argparse
+from typing import Union
 import nbformat.v4 as v4
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -38,7 +40,7 @@ def build_ntbk_path(dataset_name: str) -> str:
     
     raise FileNotFoundError(f"Notebook '{ntbk_name}' not found in '{datasets_dir}'.")
 
-def run_notebook(notebook_path, ntbk_params=None, output_path=None):
+def run_notebook(notebook_path, output_path=None):
     """
     Runs a Jupyter notebook and saves the output if specified.
     """
@@ -50,12 +52,6 @@ def run_notebook(notebook_path, ntbk_params=None, output_path=None):
     with open(notebook_path) as f:
         nb = read(f, as_version=4)
 
-    # Inject parameter cell if provided
-    if ntbk_params:
-        injected_code = '\n'.join(f'{key} = {repr(value)}' for key, value in ntbk_params.items())
-        param_cell = v4.new_code_cell(injected_code)
-        nb.cells.insert(0, param_cell)
-
     client = NotebookClient(nb, timeout=600, kernel_name='python3')
     client.execute()
 
@@ -63,7 +59,7 @@ def run_notebook(notebook_path, ntbk_params=None, output_path=None):
         with open(output_path, 'w') as f:
             write(nb, f)
 
-def download_datasets(datasets_selection:str | list='default', task: str='all', path: str=None) -> bool:
+def download_datasets(datasets_selection: Union[str, list] = 'default', task: str = 'all') -> bool:
     """
     Run downlaod and default processing of selected datasets via jupiter notebooks.
 
@@ -96,7 +92,7 @@ def download_datasets(datasets_selection:str | list='default', task: str='all', 
         # Run the notebook
         try:
             info_msg(f"Running notebook for dataset '{dataset_name}' at '{ntbk_path}'...")
-            run_notebook(ntbk_path, ntbk_params={'data_path': path})
+            run_notebook(ntbk_path)
             info_msg(f"Successfully ran notebook for dataset '{dataset_name}'.", color='green')
         except Exception as e:
             error_msg(f"Error running notebook for dataset '{dataset_name}': {e}")
@@ -104,7 +100,31 @@ def download_datasets(datasets_selection:str | list='default', task: str='all', 
     return True
 
 if __name__ == "__main__":
-    
-    download_selection = 'hs_cards'  # or 'clf', 'reg', <specific_dataset_name>
+    parser = argparse.ArgumentParser(description="Download and preprocess selected datasets via Jupyter notebooks.")
 
-    download_datasets(download_selection, task='all', path=None)
+    parser.add_argument(
+        "--selection",
+        type=str,
+        nargs="+",
+        required=True,
+        help=(
+            "Dataset selection(s). Accepts one or more of: 'default', 'extra', 'other', or specific dataset names. "
+            "Example: --selection default hs_cards"
+        )
+    )
+
+    parser.add_argument(
+        "--task",
+        type=str,
+        choices=["clf", "reg", "all"],
+        default="all",
+        help="Task type: 'clf' for classification, 'reg' for regression, or 'all' (default)"
+    )
+
+    args = parser.parse_args()
+
+    success = download_datasets(datasets_selection=args.selection, task=args.task)
+    if success:
+        print("✅ All notebooks executed successfully.")
+    else:
+        print("❌ Some notebooks failed to execute.")

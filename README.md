@@ -91,7 +91,7 @@ At last, there is also space for some further analysis of the final data, ready 
 ### 4. Download the Datasets
 Run
 ```bash
-python src/download_datasets/download_datasets.py --task <reg/clf> --selection <[default/extra/other/_specific_name_]>
+python src/download_datasets/download_datasets.py --task <reg/clf> --selection <default/extra/other/_specific_name_ (can list multiple)>
 ```
 to download either a single dataset or a whole subset of them. It will save both the raw and processed version of the data to the `datasets_files` folder.
 
