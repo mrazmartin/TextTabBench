@@ -9,26 +9,32 @@ This work is part of our workshop paper:
 ---
 
 ## 📁 Repository Structure
-TEXTTABBENCH/
+
+```text
+TextTabBench/
 │
-├── configs/ # Configuration scripts for each dataset
-├── datasets_files/ # Raw or preprocessed dataset files
-├── datasets_notebooks/ # Jupyter notebooks to load and inspect datasets
+├── configs/                     # Configuration scripts for dataset metadata
+├── datasets_files/              # Raw and preprocessed data files (inits upon running a dataset notebook)
+├── datasets_notebooks/          # Jupyter notebooks to downlaod and explore each dataset
+│    ├── paper_datasets/              # Datasets included in the workshop paper
+│    │   ├── classification/          # Classification tasks
+│    │   └── regression/              # Regression tasks
+│    │
+│    ├── extra_datasets/              # Additional high-quality datasets not included in the paper
+│    │   └── ... 
+│    └── other_datasets/              # Other datasets worth mentioning
+│        └── ... 
 │
-├── paper_datasets/ # Datasets included in our workshop paper
-│ ├── classification/ # Datasets with categorical targets
-│ └── regression/ # Datasets with continuous targets
+├── examples/                    # Sample workflows and modeling pipelines
+│    └── ... 
+│    
+├── src/                         # Source code for utilities and dataset processing
+│   ├── dataloader_functions/    # Helpers functions
+│   └── download_datasets/       # Script to download datasets pipelines
 │
-├── extra_datasets/ # Additional datasets not included in the paper
-│
-├── examples/ # Example scripts using the datasets
-│
-├── src/ # Source code for preprocessing and utilities
-│ ├── dataloader_functions/
-│ └── text_processors/
-│
-├── requirements.txt # Python dependencies
-└── README.md # You are here
+├── requirements.txt             # Python dependencies
+└── README.md                    # You're here!
+```
 ---
 
 ## 📚 Dataset Groups
@@ -39,13 +45,16 @@ These datasets were selected and evaluated in our workshop paper. They were chos
 
 - Balanced and meaningful text features
 - Real-world tabular context
-- Predictive signal beyond text-only baselines
+- Predictive signal from both structured and textual features
 
 They are split into `classification/` and `regression/` folders. Each dataset is provided as a Jupyter notebook with all required steps for inspection and use.
 
-### `extra_datasets/` (Valuable Additions)
+### `extra_datasets/` (Second Wave Additions)
+These are high-quality datasts that did not make it to our benchmark at the time of writing / running our evaluations.
 
-These are high-quality datasets that did not make it into the final benchmark due to reasons like domain overlap, preprocessing inconsistencies, or weaker text signals. Still, they are useful for experimentation and ablation studies.
+### `other_datasets/` (Valuable Additions)
+
+These are good-quality datasets that did not make it into the final benchmark due to reasons like domain overlap, weaker/unclear text signals etc. Still, they are useful for experimentation and ablation studies.
 
 ### Future Additions
 
@@ -78,7 +87,11 @@ Open any dataset notebook to go throught the download and necessary preprocessin
 At last, there is also space for some further analysis of the final data, ready to be ussed by any table-w-text solution pipeline.
 
 ### 4. Download the Datasets
-Run `src/download_datasets/download_datasets.py --dataset <dataset_name> --path <home_dir_for_downloads> --task <reg/clf> --selection <all/default>` to download either a single dataset or a whole subset of them.
+Run
+```bash
+python src/download_datasets/download_datasets.py --dataset <dataset_name> --path <home_dir_for_downloads> --task <reg/clf> --selection <all/default>
+```
+to download either a single dataset or a whole subset of them.
 
 ---
 
