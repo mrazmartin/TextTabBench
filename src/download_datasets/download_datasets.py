@@ -7,12 +7,10 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, '..', '..'))
 
 if project_root not in sys.path:
-    os.environ["PROJECT_ROOT"] = project_root
     sys.path.insert(0, project_root)
 
 from configs.dataset_configs import get_dataset_list, get_a_dataset_dict
 from src.dataloader_functions.utils.log_msgs import info_msg, warn_msg, error_msg
-project_root = os.environ["PROJECT_ROOT"]
 
 def build_ntbk_path(dataset_name: str) -> str:
     """
@@ -103,7 +101,7 @@ def download_datasets(datasets_selection:str | list='default', task: str='all', 
         except Exception as e:
             error_msg(f"Error running notebook for dataset '{dataset_name}': {e}")
             return False
-
+    return True
 
 if __name__ == "__main__":
     
